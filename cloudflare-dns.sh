@@ -24,6 +24,7 @@ is_proxied4=""
 is_proxied6=""
 is_proxiable4=""
 is_proxiable6=""
+ip_changed=false
 
 # Colors
 export TERM=xterm-256color
@@ -507,6 +508,7 @@ process_domains() {
       load_msg "New DNS record IPv4 of ${domain_name} is: ${dns_record_ip4}. Trying to update..."
       update_dns_record_4=$(write_record "$api_zone_id" "$dns_record_id_4" "$api_zone_token" "A" "$domain_name" "$ip4" "$ttl" "$domain_proxied")
       push_validation "$update_dns_record_4" "IPv4"
+      ip_changed=true
     fi
 
     ### Check if IPv6 or proxy have changed and update if needed
@@ -517,6 +519,7 @@ process_domains() {
       load_msg "New DNS record IPv6 of ${domain_name} is: ${dns_record_ip6}. Trying to update..."
       update_dns_record_6=$(write_record "$api_zone_id" "$dns_record_id_6" "$api_zone_token" "AAAA" "$domain_name" "$ip6" "$ttl" "$domain_proxied")
       push_validation "$update_dns_record_6" "IPv6"
+      ip_changed=true
     fi
 
     # Show results
@@ -538,7 +541,7 @@ process_domains() {
     printf "\n"
 
     ### Telegram notification
-    notifications
+    [[ "$ip_changed" == true ]] && notifications
 
   done
   return 0;
